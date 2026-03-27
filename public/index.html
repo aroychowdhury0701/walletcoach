@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WalletCoach</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h1>💸 WalletCoach</h1>
+
+<div class="card">
+  <input id="text" placeholder="Spent on..." />
+  <input id="amount" type="number" placeholder="₹ Amount" />
+  <input id="date" type="date" />
+  
+  <select id="category">
+    <option value="">Auto Detect</option>
+    <option>Food</option>
+    <option>Transport</option>
+    <option>Entertainment</option>
+    <option>Other</option>
+  </select>
+
+  <button onclick="addExpense()">Add Expense</button>
+</div>
+
+<div class="card">
+  <input id="budgetInput" type="number" placeholder="Monthly Budget ₹" />
+  <button onclick="setBudget()">Set Budget</button>
+</div>
+
+<h2>Budget Left</h2>
+<div class="bar-container">
+  <div id="budgetBar"></div>
+</div>
+
+<canvas id="chart"></canvas>
+
+<h2>Expenses</h2>
+<div id="tabs"></div>
+<ul id="list"></ul>
+
+<h2>Calendar View</h2>
+<ul id="calendar"></ul>
+
+<script src="script.js"></script>
+</body>
+</html>
