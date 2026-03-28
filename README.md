@@ -1,5 +1,6 @@
-# 💸 [Project Name] - Personal Finance, Decoded.
-
+# 💸 WalletCoach- Personal Finance, Decoded.
+Deployment link: https://walletcoach.onrender.com
+Note: Hosted on a free tier, please allow 30 seconds for the initial load.
 ![Hackathon](https://img.shields.io/badge/Hackathon-Project-orange?style=for-the-badge)
 ![Tech Stack](https://img.shields.io/badge/Tech-Vanilla_JS_|_Express_|_Chart.js-blue?style=for-the-badge)
 
