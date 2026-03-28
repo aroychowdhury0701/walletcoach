@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WalletCoach</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <main class="main-content">
+            <header>
+                <div>
+                    <h1>WalletCoach</h1>
+                    <p class="subtitle">Track your cashflow. Build your future.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="jargon-search-box">
+                        <input type="text" id="jargon-input" placeholder="🔍 Search any term you want.." onkeyup="handleJargonSearch(event)" autocomplete="off">
+                        <div id="jargon-results" class="jargon-dropdown hidden"></div>
+                    </div>
+                    <div class="tabs">
+                        <button id="tab-categories" class="tab-btn active" onclick="switchTab('categories')">📊 Categories</button>
+                        <button id="tab-calendar" class="tab-btn" onclick="switchTab('calendar')">📅 Calendar View</button>
+                    </div>
+                </div>
+            </header>
+
+            <div id="view-categories" class="view-section active">
+                <div class="grid-2 mb-24">
+                    <div class="card card-chart">
+                        <h2 class="text-orange">Expense Breakdown</h2>
+                        <div class="chart-container"><canvas id="expenseChart"></canvas></div>
+                    </div>
+                    <div class="card card-expense-categories">
+                        <h2 class="text-orange">Expense Categories</h2>
+                        <p class="text-muted mb-16" style="font-size: 0.85rem; color: #9ca3af;">Click a category to view details</p>
+                        <div id="expense-categories-list" class="expense-list-container"></div>
+                    </div>
+                </div>
+
+                <div class="card card-entries">
+                    <div class="flex-between mb-16">
+                        <h2 class="text-green mb-0">Recent Entries</h2>
+                        <select id="recent-filter" class="filter-dropdown" onchange="renderTransactions()">
+                            <option value="all">All</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                    </div>
+                    <div id="transactions-list" class="transactions-list"></div>
+                </div>
+            </div>
+
+            <div id="view-calendar" class="view-section card">
+                <div class="calendar-header mb-16">
+                    <h2 class="text-green mb-0">Calendar Timeline</h2>
+                    <div class="calendar-controls">
+                        <select id="calendar-type-filter" class="filter-dropdown" onchange="renderCalendar()">
+                            <option value="all">All Types</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                        <select id="calendar-time-filter" class="filter-dropdown" onchange="toggleTimeFilter()">
+                            <option value="all">All Time</option>
+                            <option value="month">By Month</option>
+                            <option value="date">By Date</option>
+                        </select>
+                        <input type="month" id="month-filter" class="filter-dropdown hidden" onchange="renderCalendar()">
+                        <input type="date" id="date-filter" class="filter-dropdown hidden" onchange="renderCalendar()">
+                    </div>
+                </div>
+                
+                <div class="net-balance-box mb-16">
+                    <span>Net Balance (Income - Spent):</span>
+                    <strong id="cal-net-balance">₹0.00</strong>
+                </div>
+
+                <div id="calendar-list" class="calendar-list"></div>
+            </div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="stats-card">
+                <h2>Stats</h2>
+                
+                <div class="stat-group mb-24">
+                    <div class="flex-between mb-8">
+                        <p class="stat-label mb-0">Monthly Budget & Spent</p>
+                        <button id="btn-set-budget" class="btn-text-small text-orange hidden" onclick="promptBudget()">Edit</button>
+                    </div>
+                    <div id="budget-display-area">
+                        <button id="btn-add-budget" class="btn-outline w-full" onclick="promptBudget()">+ Enter monthly budget</button>
+                        <div id="budget-stats" class="hidden">
+                            <h3 id="money-left" class="stat-value">₹0.00 <span style="font-size:1rem; font-weight:normal; color:#9ca3af;">left</span></h3>
+                            <div class="progress-info">
+                                <span id="spent-text">Spent: ₹0</span>
+                                <span id="limit-text">Limit: ₹0</span>
+                            </div>
+                            <div class="progress-bar-bg" style="background-color: #22c55e;">
+                                <div id="limit-bar" class="progress-bar-fill" style="background-color: #ef4444;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-group mb-24 pt-16" style="border-top: 1px solid #1f2937;">
+                    <div class="flex-between mb-8">
+                        <p class="stat-label mb-0">Monthly Saving Goal</p>
+                        <button id="btn-edit-goal" class="btn-text-small text-green hidden" onclick="promptGoal()">Edit</button>
+                    </div>
+                    <div id="goal-display-area">
+                        <button id="btn-add-goal" class="btn-outline w-full" onclick="promptGoal()">+ Add Monthly Saving Goal</button>
+                        <div id="goal-stats" class="hidden flex-between">
+                            <div>
+                                <p style="font-size: 0.8rem; color:#9ca3af;">Current Track</p>
+                                <p id="monthly-savings" class="stat-value-small">₹0.00</p>
+                            </div>
+                            <div style="text-align:right;">
+                                <p style="font-size: 0.8rem; color:#9ca3af;">Target</p>
+                                <p id="goal-target-text" class="stat-value-small text-gray-100">₹0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-box mt-16 mb-24">
+                    <p class="stat-label">Total Saved (All Time)</p>
+                    <p id="total-saved" class="stat-value-small text-orange">₹0.00</p>
+                </div>
+
+                <div class="stat-group mt-24 pt-16" style="border-top: 1px solid #1f2937;">
+                    <div class="flex-between mb-8">
+                        <p class="stat-label mb-0" style="font-weight: bold; color: #f3f4f6;">Budget Allocation</p>
+                        <button class="btn-text-small text-orange" onclick="openRatioModal()">⚙️ Customize</button>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 16px;">Split and track your budget by buckets.</p>
+                    
+                    <div id="rule-breakdown" class="rule-boxes-container mb-16"></div>
+
+                    <div class="chart-container" style="height: 160px;">
+                        <canvas id="ruleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div id="ratio-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeRatioModal()">×</button>
+            <h2 class="mb-16">Customize Split Ratio</h2>
+            <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 16px;">Percentages must add up to 100%.</p>
+            <form id="ratio-form" onsubmit="saveRatio(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Needs (%)</label>
+                        <input type="number" id="input-ratio-needs" required min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Wants (%)</label>
+                        <input type="number" id="input-ratio-wants" required min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Goals (%)</label>
+                        <input type="number" id="input-ratio-goals" required min="0" max="100">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Save Ratio</button>
+            </form>
+        </div>
+    </div>
+
+    <button class="fab" onclick="openModal()">+ Add</button>
+
+    <div id="tx-details-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeTxDetailsModal()">×</button>
+            <h2 class="mb-16">Transaction Details</h2>
+            <div id="tx-details-content" class="details-content"></div>
+        </div>
+    </div>
+
+    <div id="category-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeCategoryModal()">×</button>
+            <h2 id="cat-modal-title" class="text-orange mb-16">Category Details</h2>
+            <div id="cat-modal-list" class="transactions-list" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+  <div id="add-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <h2>Add Entry</h2>
+            
+            <form id="add-form" onsubmit="handleFormSubmit(event)">
+                <div class="type-toggle">
+                    <button type="button" id="btn-expense" class="toggle-btn active" onclick="setType('expense')">Expense</button>
+                    <button type="button" id="btn-income" class="toggle-btn" onclick="setType('income')">Income</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Amount (₹)</label>
+                        <input type="number" id="input-amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="input-date" required>
+                    </div>
+                </div> <div id="bucket-selection-group" class="form-group">
+                    <label>Expense Type</label>
+                    <select id="input-bucket" class="filter-dropdown w-full" style="padding: 12px; border-radius: 12px; width: 100%;">
+                        <option value="needs">Need (Essential)</option>
+                        <option value="wants">Want (Non-essential)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Description Name</label>
+                    <input type="text" id="input-name" placeholder="e.g., Groceries" required>
+                </div>
+
+                <div class="category-box">
+                    <label>Select or Add Category</label>
+                    <div class="add-cat-row">
+                        <input type="text" id="new-cat-input" placeholder="New category...">
+                        <button type="button" class="btn-secondary" onclick="addCategory()">Add</button>
+                    </div>
+                    <div id="category-list" class="category-list">
+                        <span class="empty-text">No categories added yet.</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Save Entry</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
